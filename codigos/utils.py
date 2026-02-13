@@ -67,8 +67,8 @@ def fechamento_diario(tabela):
     
     #Agrupa a soma dos valores corrigidos com a coluna de data, porém, ela que agrupada com o Grouper, pois foi usado o argumento freq para
     #que a frequência seja diária como foi pedido. Poderia ser M de mês ou W para semanas.
-    tabela_fechamento_diario = tabela.groupby(pd.Grouper(key='data', freq='D')).agg(
-        saldo_diario = ('valor_corrigido', 'sum')
+    tabela_fechamento_diario = tabela.groupby([pd.Grouper(key='data', freq='D'), 'conta']).agg(
+        saldo_diario = ('valor_corrigido', 'sum'),
     )
     
     return tabela_fechamento_diario
