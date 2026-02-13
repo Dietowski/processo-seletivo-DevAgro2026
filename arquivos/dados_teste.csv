@@ -1,4 +1,4 @@
-data;conta;tipo;valor;descrição
+data;conta;tipo;valor;descrição;
 2026-01-01;CAIXA;C;1000.00;Saldo inicial
 2026-01-01;BANCO BRASIL;C;5000.00;Aporte Capital
 2026-01-01;SANTANDER;C;2000.00;Empréstimo
