@@ -1,34 +1,44 @@
-#import csv
-#
-#with open('../arquivos/dados_teste.csv', "r") as arquivo:
-#    arquivo_csv = csv.reader(arquivo, delimiter=";")
-#    for linha in arquivo_csv:
-#        print(linha)
-
+#Importando as funções que foram criadas no arquivo auxiliar utils.py, que representa utilitário.
 from utils import *
 
+#Caminho da base de dados armazenada em uma pasta dedicada.
 caminho_csv = "../arquivos/dados_teste.csv"
 
-tabela = ler_arquivo(caminho_csv)
-caminho_excel = "../arquivos/dados_excel.xlsx"
+try:
+    #               ETAPA 1
+    #Lê o arquivo csv e armazena a tabela na variável "tabela"
+    tabela = ler_arquivo(caminho_csv)
+    
+    #Cria uma nova coluna que recebe os valores da forma em que: C = positivo(positivo), D = negativo(subtrai), axis=1 representa o eixo
+    tabela['valor_corrigido'] = tabela.apply(calcular_valor_corrigido, axis=1)
 
-tabela['valor_ajustado'] = tabela.apply(calcular_valor_ajustado, axis=1)
-saldo_total = tabela.groupby('conta').agg(
-    saldo_total = ('valor_ajustado', 'sum')
-    ).sort_index()
+    #A função utiliza uma tabela que soma a coluna de valor_ajustado para cada tipo de conta bancária,
+    #depois essa nova tabela será armazenada na variável "saldo_final"
+    saldo_final = calcular_saldo_final(tabela)
+    print(saldo_final)
 
-print(saldo_total)
+    #               ETAPA 2
+    #A função reutiliza a tabela, reorganizando a coluna e os indíces para gerar uma nova tabela com a soma dos valores de crédito,
+    #débito e a contagem dos lançamentos. A função retorna uma tabela que será armazenada na variável "total".
+    total = calcular_lancamentos(tabela)
+    print(total)
 
-#               TESTES DE APRENDIZADO
-#tabela.to_excel(caminho_excel, index=False)
-#print(tabela["valor"].sum()) #ou display no jupyter notebook
-##tabela["valor_acumulado"] = tabela["valor"] * 12
-##tabela.drop('valor', axis=1)
-#print(tabela.info())
-#print(tabela.describe())
-#print(tabela.sort_values(by="conta", ascending=False)) OU SEM ASCENDING PRA FICAR DO MENOR PRO MAIOR
-#print(tabela["conta"].value_counts())
-#print(tabela.groupby("conta")["valor"].mean())
+    #A função cria uma nova coluna chamada saldo_acumulado, em que para cada conta, será calculado a soma dos valores acumulativamente,
+    #mostrando quando fica negativo ou não.
+    tabela_registros = registrar_inconsistencias(tabela)
+    print(tabela_registros)
+    #A função do tipo void, verifica se há saldos negativos em qualquer momento da soma acumulativa, caso tenha, a função própria mostra
+    #as linhas em que houve essa questão.
+    processar_saldos_negativos(tabela_registros)
+    
+    #               ETAPA 3
+    #A função agrupa as datas em dia (baseado na frequência) por valores que foram corrigidos, assim tendo a soma total por dia. 
+    tabela_fechamento_diario = fechamento_diario(tabela)
+    print(tabela_fechamento_diario)
+    
+    #Função void que apenas verifica se houve lançamentos repetidos, a própria função realiza a impressão caso tenha duplicação, mostrando as linhas de
+    #ocorrência.
+    detectar_lancamento_duplicado(tabela)
 
-##tabela['valor_ajustado'] = tabela['valor']
-##tabela.loc[tabela['tipo'] == 'D', 'valor_ajustado'] *= -1
+except FileNotFoundError:
+    print("Caminho não encontrado")
